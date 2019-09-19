@@ -13,12 +13,15 @@ class TodoListViewController: UITableViewController {
     
     var itemArray = ["Get laid","Kill all humans","Get money"]
     
+    let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
-        
+        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+            itemArray = items
+        }
         
     }
 
@@ -79,12 +82,24 @@ class TodoListViewController: UITableViewController {
             
             if textField.text != nil {
                 self.itemArray.append(textField.text!)
-                self.tableView.reloadData()
+                self.defaults.set(self.itemArray, forKey: "TodoListArray")  // saves the data so when app is terminated and relaunched it shows up using Line 22 function
+                self.tableView.reloadData()  // Reload data so added items show up
             } else {
                 self.itemArray.append("New Item")
+                self.defaults.set(self.itemArray, forKey: "TodoListArray")
+                self.tableView.reloadData()  // Reload data so added items show up
             }
             
-        } // CLOSURE END
+        }
+        
+//        CANCEL BUTTON
+        
+//        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
+//            print("cancelled")
+//        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) in
+            print("Cancelled")
+        }))
         
         // ADDS A TEXT FIELD TO ADDBUTTON BITTON
         alert.addTextField { (alertTextField) in
