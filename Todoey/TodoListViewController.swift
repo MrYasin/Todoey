@@ -11,7 +11,7 @@ import UIKit
 class TodoListViewController: UITableViewController {
 
     
-    let itemArray = ["Get laid","Kill all humans","Get money"]
+    var itemArray = ["Get laid","Kill all humans","Get money"]
     
     
     override func viewDidLoad() {
@@ -63,8 +63,43 @@ class TodoListViewController: UITableViewController {
     
     
     
+    //MARK: - Add New Item
     
-    
+    @IBAction func AddButtonPressed(_ sender: UIBarButtonItem) {
+        
+        // LOCAL VARIABLE FOR TEXTFIELD
+        var textField = UITextField()
+        
+        // POP-UP FOR ADDING ITEM
+        
+        let alert = UIAlertController(title: "Add New ToDo", message: "", preferredStyle: .alert)
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+
+        // WHEN ADD ITEM BUTTON PRESSED
+            
+            if textField.text != nil {
+                self.itemArray.append(textField.text!)
+                self.tableView.reloadData()
+            } else {
+                self.itemArray.append("New Item")
+            }
+            
+        } // CLOSURE END
+        
+        // ADDS A TEXT FIELD TO ADDBUTTON BITTON
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new item"
+            // Adding alertTextField to local var textField so we can access what was written inside text field anywhere inside function
+            textField = alertTextField
+            
+        }
+
+        
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
+        
+        
+    }
     
     
     
