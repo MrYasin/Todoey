@@ -8,8 +8,9 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     
@@ -19,6 +20,7 @@ class CategoryViewController: UITableViewController {
         super.viewDidLoad()
         
         loadCategories()
+        tableView.separatorStyle = .none
         
     }
 
@@ -28,13 +30,16 @@ class CategoryViewController: UITableViewController {
         // If categories is nil not nil return count -- if nil return 1
         return categories?.count ?? 1
     }
+
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+        
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
         
+        cell.backgroundColor = UIColor(hexString: categories?[indexPath.row].color ?? "003366")
+
         return cell
     }
     
@@ -60,38 +65,39 @@ class CategoryViewController: UITableViewController {
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
-         // LOCAL VARIABLE FOR TEXTFIELD
-         var textField = UITextField()
-         
-         // POP-UP FOR ADDING ITEM
-         
-         let alert = UIAlertController(title: "Add New Todoey", message: "", preferredStyle: .alert)
-         let action = UIAlertAction(title: "Add", style: .default) { [weak self] (action) in
-             guard let self = self else { return }
-             // WHEN ADD ITEM BUTTON PRESSED
-             
-             let newCategory = ItemCategory()
-             newCategory.name = textField.text!
-             
-             self.save(category: newCategory)
-         }
-
-         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) in
-             print("Cancelled")
-         }))
-         
-         // ADDS A TEXT FIELD TO ADDBUTTON
-         alert.addTextField { (alertTextField) in
-             alertTextField.placeholder = "Create new category"
-             // Adding alertTextField to local var textField so we can access what was written inside text field anywhere inside function
-             textField = alertTextField
-             
-         }
-
-         
-         alert.addAction(action)
-         present(alert, animated: true, completion: nil)
-         
+        // LOCAL VARIABLE FOR TEXTFIELD
+        var textField = UITextField()
+        
+        // POP-UP FOR ADDING ITEM
+        
+        let alert = UIAlertController(title: "Add New Todoey", message: "", preferredStyle: .alert)
+        let action = UIAlertAction(title: "Add", style: .default) { [weak self] (action) in
+            guard let self = self else { return }
+            // WHEN ADD ITEM BUTTON PRESSED
+            
+            let newCategory = ItemCategory()
+            newCategory.name = textField.text!
+            newCategory.color = UIColor.randomFlat().hexValue()
+            
+            self.save(category: newCategory)
+        }
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) in
+            print("Cancelled")
+        }))
+        
+        // ADDS A TEXT FIELD TO ADDBUTTON
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new category"
+            // Adding alertTextField to local var textField so we can access what was written inside text field anywhere inside function
+            textField = alertTextField
+            
+        }
+        
+        
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
+        
         
         
     }
@@ -122,6 +128,7 @@ class CategoryViewController: UITableViewController {
         tableView.reloadData()  // Reload data so added items show up
     }
     
+    
     func loadCategories() {
         
         categories = realm.objects(ItemCategory.self)
@@ -130,15 +137,23 @@ class CategoryViewController: UITableViewController {
     }
     
     
-    
-    
-    
-    
-    
+    override func updateModel(at IndexPath: IndexPath) {
+        if let categoryForDeletion = self.categories?[IndexPath.row] {
+            do {
+                try self.realm.write {
+                    self.realm.delete(categoryForDeletion)
+                }
+            } catch {
+                print("Error deleting category --> \(error)")
+            }
+
+        }
+    }
     
     
     
     
 }
+
 
 
